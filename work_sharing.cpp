@@ -1,8 +1,9 @@
 #include <omp.h>
 
-#include <chrono>
 #include <iostream>
 #include <thread>
+#include <chrono>
+#include <vector>
 #include <cmath>
 
 void helloOpenMP() {
@@ -57,7 +58,7 @@ void single_master() {
     omp_set_num_threads(std::thread::hardware_concurrency());
 #pragma omp parallel 
     {
-#pragma omp single
+#pragma omp single //nowait
         std::cout << "gathering input: " << omp_get_thread_num() << '\n';
 #pragma omp critical
         std::cout << "in parallel on: " << omp_get_thread_num() << '\n';
@@ -66,10 +67,38 @@ void single_master() {
         std::cout << "output on : " << omp_get_thread_num() << '\n';
     }
 }
+
+void sync() {
+    std::cout <<  "atomic\n";
+    int sum{0};
+#pragma omp parallel for num_threads(4)
+    for(int i = 0; i < 100; ++i) {
+#pragma omp atomic
+        ++sum;
+    }
+    std::cout << sum << '\n';
+
+    std::cout << "=====sync=====\n";
+    std::cout << "ordered\n";
+    std::vector<int> squares;
+#pragma omp parallel for ordered
+    for (int i = 0; i < 20; ++i) {
+        printf("%d: %d\n", omp_get_thread_num(), i);
+        int j = i*i;
+#pragma omp ordered
+        squares.push_back(j);
+    }
+
+    for(const auto square : squares) {
+        std::cout << "- " << square << '\n';
+    }
+}
+
 int main(int argc, char* argv[]) {
-//   helloOpenMP();
-//   parallizeForLoop();
-//   sections();
-    single_master();
+    // helloOpenMP();
+    // parallizeForLoop();
+    // sections();
+    // single_master();
+    sync();
     return 0;
 }

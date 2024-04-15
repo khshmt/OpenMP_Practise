@@ -5,3 +5,6 @@ find_package(OpenMP REQUIRED)
 
 add_executable(work_sharing work_sharing.cpp)
 target_link_libraries(work_sharing PRIVATE OpenMP::OpenMP_CXX) 
+
+add_executable(data_sharing data_sharing.cpp)
+target_link_libraries(data_sharing PRIVATE OpenMP::OpenMP_CXX) 
